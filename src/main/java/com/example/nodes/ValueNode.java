@@ -70,7 +70,7 @@ public class ValueNode extends BaseNode {
 
     public void setValue(double value) {
         this.value = value;
-        propagate(); // auto-trigger downstream updates if set programmatically
+        propagate();
     }
 
     public Object getValue() {
@@ -104,7 +104,7 @@ public class ValueNode extends BaseNode {
             }
         }
 
-        propagate(); // 🔁 trigger downstream nodes
+        propagate();
     }
 
     private void validateAndCommit(TextField field) {
@@ -186,13 +186,13 @@ public class ValueNode extends BaseNode {
             
             valueField.setOnAction(e -> {
                 validateAndCommit(valueField);
-                evaluate();   // 🔁 trigger downstream update
+                evaluate();
             });
             
             valueField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
                 if (!isNowFocused) {
                     validateAndCommit(valueField);
-                    evaluate(); // 🔁 trigger downstream update
+                    evaluate();
                 }
             });
             

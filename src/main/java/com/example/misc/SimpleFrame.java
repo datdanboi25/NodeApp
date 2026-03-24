@@ -11,18 +11,8 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.*;
 
-/**
- * SimpleFrame — ultra-straightforward, readable DataFrame-like table.
- * - Columns: List<String>
- * - Data:    List<Object[]> (each row same length as columns)
- * - Nulls:   use null directly
- * - Types:   you decide; cast when reading
- *
- * This is meant to be EASY TO MODIFY, not fast.
- */
+// simple dataframe-ish table, not optimized but easy to work with
 public class SimpleFrame {
-
-    /* ===== Schema ===== */
 
     private final List<String> columns = new ArrayList<>();
     private final Map<String, Integer> nameToIndex = new LinkedHashMap<>();
@@ -56,8 +46,6 @@ public class SimpleFrame {
     public int rowCount() { return rows.size(); }
     public int colCount() { return columns.size(); }
 
-    /* ===== Row add / set / get ===== */
-
     public void addRow(Object... values) {
         if (values.length != colCount())
             throw new IllegalArgumentException("Expected " + colCount() + " values but got " + values.length);
@@ -81,8 +69,6 @@ public class SimpleFrame {
     public void set(int row, String col, Object value) {
         rows.get(row)[colIndex(col)] = value;
     }
-
-    /* ===== Column add / drop / select ===== */
 
     public void addColumn(String name, List<?> values) {
         if (nameToIndex.containsKey(name)) throw new IllegalArgumentException("Column exists: " + name);
@@ -158,7 +144,6 @@ public class SimpleFrame {
         }
     }
 
-    /** Very basic Excel loader: first row = header, rest = data. */
     public static SimpleFrame readExcel(Path path) throws IOException {
         try (InputStream is = new FileInputStream(path.toFile());
             Workbook wb = new XSSFWorkbook(is)) {
@@ -200,8 +185,6 @@ public class SimpleFrame {
         }
     }
 
-    /* ===== Filtering ===== */
-
     public interface RowView {
         int index();
         Object get(String col);
@@ -224,7 +207,6 @@ public class SimpleFrame {
         public Object get(String col) { return rows.get(i)[colIndex(col)]; }
     }
 
-    /** Convenience: where column value satisfies a predicate */
     public SimpleFrame where(String col, Predicate<Object> p) {
         int idx = colIndex(col);
         SimpleFrame out = new SimpleFrame(columns);
@@ -233,8 +215,6 @@ public class SimpleFrame {
         }
         return out;
     }
-
-    /* ===== Sorting ===== */
 
     public SimpleFrame sortBy(String col, Comparator<Object> cmp, boolean ascending) {
         int idx = colIndex(col);
@@ -253,8 +233,6 @@ public class SimpleFrame {
         return out;
     }
 
-    /* ===== Head / Tail ===== */
-
     public SimpleFrame head(int n) {
         n = Math.max(0, Math.min(n, rowCount()));
         SimpleFrame out = new SimpleFrame(columns);
@@ -268,8 +246,6 @@ public class SimpleFrame {
         for (int i = rowCount() - n; i < rowCount(); i++) out.rows.add(Arrays.copyOf(rows.get(i), colCount()));
         return out;
     }
-
-    /* ===== CSV (very basic) ===== */
 
     public static SimpleFrame readCSV(Path path, boolean header) throws IOException {
         List<String> lines = Files.readAllLines(path);
@@ -297,12 +273,9 @@ public class SimpleFrame {
         return df;
     }
 
-    // super-naive CSV splitter (no quotes/escapes). Replace with a real parser if needed.
     private static List<String> parseCsvLine(String line) {
         return Arrays.asList(line.split(",", -1));
     }
-
-    /* ===== Pretty print ===== */
 
     @Override public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -319,8 +292,6 @@ public class SimpleFrame {
         if (rowCount() > show) sb.append("... (").append(rowCount() - show).append(" more rows)\n");
         return sb.toString();
     }
-
-    /* ===== Demo ===== */
 
     public static void main(String[] args) {
         SimpleFrame df = SimpleFrame.of("price", "qty", "cat");

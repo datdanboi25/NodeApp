@@ -29,10 +29,8 @@ public class ConnectionLine {
         this.from = from;
         this.to = to;
 
-        // Register with a global manager if you use one
         YourNodeManager.register(this);
 
-        // Register with sockets so capacity checks & UI state are correct
         if (!this.from.getConnectionLines().contains(this)) {
             this.from.getConnectionLines().add(this);
         }
@@ -41,13 +39,11 @@ public class ConnectionLine {
         }
         to.getParentNode().evaluate();
 
-        // Hitbox (wide invisible stroke for interactions)
         this.hitbox = new CubicCurve();
         hitbox.setStrokeWidth(12);
         hitbox.setStroke(Color.TRANSPARENT);
         hitbox.setFill(null);
 
-        // Visible curve and endpoint dots
         this.curve = new CubicCurve();
         this.startDot = new Circle(3, color);
         this.endDot = new Circle(3, color);
@@ -56,13 +52,9 @@ public class ConnectionLine {
         curve.setStroke(color);
         curve.setFill(null);
 
-        // Add to canvas
         canvas.getChildren().addAll(hitbox, curve, startDot, endDot);
-
-        // First layout pass
         update();
 
-        // Right-click to delete this connection via the central delete method
         hitbox.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.SECONDARY) {
                 deleteConnection();
@@ -70,8 +62,6 @@ public class ConnectionLine {
             }
         });
     }
-
-    // ----- Public API -----
 
     public void setValue(Object value) {
         this.value = value;
@@ -81,12 +71,10 @@ public class ConnectionLine {
         return value;
     }
 
-    /** Input side (the "to" socket) */
     public Socket getInput() {
         return to;
     }
 
-    /** Output side (the "from" socket) */
     public Socket getOutput() {
         return from;
     }
@@ -103,9 +91,6 @@ public class ConnectionLine {
         return to;
     }
 
-    /**
-     * Safely retarget input; keeps socket connection lists consistent.
-     */
     public void setInput(Socket newTo) {
         if (deleted) return;
         if (to != null) to.getConnectionLines().remove(this);
@@ -116,9 +101,6 @@ public class ConnectionLine {
         update();
     }
 
-    /**
-     * Safely retarget output; keeps socket connection lists consistent.
-     */
     public void setOutput(Socket newFrom) {
         if (deleted) return;
         if (from != null) from.getConnectionLines().remove(this);
@@ -129,14 +111,9 @@ public class ConnectionLine {
         update();
     }
 
-    /**
-     * Central deletion: detach from sockets, unregister, remove visuals.
-     * After this, sockets are free to start new drags.
-     */
     public void deleteConnection() {
         if (deleted) return;
 
-        // Detach from sockets
         if (from != null) {
             from.getConnectionLines().remove(this);
         }
@@ -144,26 +121,19 @@ public class ConnectionLine {
             to.getConnectionLines().remove(this);
         }
 
-        // Unregister globally if applicable
         YourNodeManager.unregister(this);
 
-        // Remove visuals from the scene graph (defensive)
         if (hitbox.getParent() instanceof Pane p0) p0.getChildren().remove(hitbox);
         if (curve.getParent()  instanceof Pane p1) p1.getChildren().remove(curve);
         if (startDot.getParent() instanceof Pane p2) p2.getChildren().remove(startDot);
         if (endDot.getParent()   instanceof Pane p3) p3.getChildren().remove(endDot);
 
-        // Break endpoint references to avoid stale checks elsewhere
         from = null;
         to = null;
 
         deleted = true;
     }
 
-    /**
-     * Repositions the curve/dots based on current socket locations.
-     * Safe no-ops after deletion or before visuals are ready.
-     */
     public void update() {
         if (deleted) return;
         if (from == null || to == null) return;
@@ -212,18 +182,16 @@ public class ConnectionLine {
         return from.getFullId() + " -----> " + to.getFullId();
     }
 
-    // ----- Internals -----
-
     private void updateColor() {
         if (deleted || from == null) return;
 
         Object v = from.getParentNode().getValue();
         if (v instanceof Double) {
-            color = Color.web("#63c763");     // numeric -> green
+            color = Color.web("#63c763");
         } else if (v instanceof List) {
-            color = Color.web("#6363c7");     // list -> purple
+            color = Color.web("#6363c7");
         } else {
-            color = Color.LIGHTGRAY;          // default
+            color = Color.LIGHTGRAY;
         }
         curve.setStroke(color);
         startDot.setFill(color);

@@ -47,43 +47,69 @@ public abstract class BaseNode {
     protected List<Socket> inputs = new ArrayList<>();
     protected List<Socket> outputs = new ArrayList<>();
     private static final Map<BaseNode, Point2D> dragStartPositions = new HashMap<>();
-    private final double[] dragStartMouse = new double[2]; 
+    private final double[] dragStartMouse = new double[2];
     private boolean wasDragged = false;
     private boolean startedOnSelected = false;
     private static final String name = "Base";
 
-
-    
-
     public BaseNode(String title, Color colour, double x, double y) {
         this.id = UUID.randomUUID().toString();
         VBox.setVgrow(controlsBox, Priority.ALWAYS);
-        //controlsBox.setAlignment(Pos.BOTTOM_CENTER);
+        // controlsBox.setAlignment(Pos.BOTTOM_CENTER);
         controlsBox.setAlignment(Pos.TOP_CENTER);
-        //controlsBox.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+        // controlsBox.setStyle("-fx-border-color: red; -fx-border-width: 2;");
         this.title = title;
         this.x = x;
         this.y = y;
         this.colour = colour;
     }
 
-    //protected abstract void defineSockets();
+    // protected abstract void defineSockets();
     public abstract void evaluate();
+
+    public void evaluate(int index) {
+        evaluate(); // fallback
+
+    }
+
     protected abstract void customReconfigure();
+
     public abstract Object getValue();
+
     public abstract nodeType getType();
-    //public abstract String getName();
+    // public abstract String getName();
 
-    public List<Socket> getInputs() { return inputs; }
-    public List<Socket> getOutputs() { return outputs; }
+    public List<Socket> getInputs() {
+        return inputs;
+    }
 
-    public String getTitle() { return title; }
-    public double getX() { return x; }
-    public double getY() { return y; }
+    public List<Socket> getOutputs() {
+        return outputs;
+    }
 
-    public boolean isSelected() { return selected.get(); }
-    public final void setSelected(boolean value) { selected.set(value); }
-    public final BooleanProperty selectedProperty() { return selected; }
+    public String getTitle() {
+        return title;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public boolean isSelected() {
+        return selected.get();
+    }
+
+    public final void setSelected(boolean value) {
+        selected.set(value);
+    }
+
+    public final BooleanProperty selectedProperty() {
+        return selected;
+    }
 
     public void setPosition(double x, double y) {
         this.x = x;
@@ -98,11 +124,11 @@ public abstract class BaseNode {
         return id;
     }
 
-    public void modeChange(){
-        reconfigureSockets(); // Reconfigure sockets based on the new mode
-        rerenderSockets();     // Update visual representation
+    public void modeChange() {
+        reconfigureSockets();
+        rerenderSockets();
         evaluate();
-        propagate();           // Trigger downstream updates
+        propagate();
     }
 
     public void delete(Pane canvas) {
@@ -140,17 +166,16 @@ public abstract class BaseNode {
     }
 
     protected void propagate() {
-        for (Socket output : outputs) {
-            for (ConnectionLine line : output.getConnectionLines()) {
+        for (int i = 0; i < outputs.size(); i++) {// Socket output : outputs) {
+            for (ConnectionLine line : outputs.get(i).getConnectionLines()) {
                 BaseNode target = line.getInput().getParentNode();
                 target.evaluate();
+
             }
         }
     }
 
-    
-
-    protected String formatDigitToString(Object value) { 
+    protected String formatDigitToString(Object value) {
         if (value == null) {
             return null;
         } else {
@@ -170,44 +195,42 @@ public abstract class BaseNode {
         }
     }
 
-    protected void reconfigureSockets(){
-        // Step 1: Save connection lines
+    protected void reconfigureSockets() {
+        // save existing connections before we wipe the sockets
         List<ConnectionLine> oldInputs = new ArrayList<>();
-        for (Socket s : inputs) oldInputs.addAll(s.getConnectionLines());
+        for (Socket s : inputs)
+            oldInputs.addAll(s.getConnectionLines());
 
         List<ConnectionLine> oldOutputs = new ArrayList<>();
-        for (Socket s : outputs) oldOutputs.addAll(s.getConnectionLines());
+        for (Socket s : outputs)
+            oldOutputs.addAll(s.getConnectionLines());
 
-        // Step 2: Clear + recreate sockets based on mode
         inputs.clear();
         outputs.clear();
 
         this.customReconfigure();
-    
 
-        // Step 3: Try to reconnect old inputs
+        // try to reconnect old inputs
         for (ConnectionLine line : oldInputs) {
             Socket match = findBestMatchingSocket(inputs, line.getInput());
             if (match != null) {
                 line.setInput(match);
             } else {
-                line.deleteConnection(); // fallback
+                line.deleteConnection();
             }
         }
 
-        // Step 4: Try to reconnect old outputs
+        // try to reconnect old outputs
         for (ConnectionLine line : oldOutputs) {
             Socket match = findBestMatchingSocket(outputs, line.getOutput());
             if (match != null) {
                 line.setOutput(match);
             } else {
-                line.deleteConnection(); // fallback
+                line.deleteConnection();
             }
         }
     }
 
-
-    // ✅ New version
     private Socket findBestMatchingSocket(List<Socket> candidates, Socket original) {
         for (Socket s : candidates) {
             if (Objects.equals(s.getName(), original.getName())) {// check by name
@@ -215,22 +238,21 @@ public abstract class BaseNode {
                     if (original.getTypeList().contains(t)) {
                         return s;
                     }
-            }
-            }
-        }
-        // Fallback to type-based match
-        /* 
-        for (Socket s : candidates) {
-            for (SocketType t : s.getTypeList()) {
-                if (original.getTypeList().contains(t)) {
-                    return s;
                 }
             }
         }
+        // Fallback to type-based match
+        /*
+         * for (Socket s : candidates) {
+         * for (SocketType t : s.getTypeList()) {
+         * if (original.getTypeList().contains(t)) {
+         * return s;
+         * }
+         * }
+         * }
          */
         return null;
     }
-
 
     protected void rerenderSockets() {
         renderRef.getChildren().removeIf(n -> n instanceof Circle);
@@ -246,9 +268,9 @@ public abstract class BaseNode {
             socketCircle.setTranslateY(y);
             socketCircle.setMouseTransparent(false);
             socketCircle.setPickOnBounds(true);
-            
+
             renderRef.getChildren().add(socketCircle);
-            
+
             socketCircle.setOnMouseClicked(e -> {
                 if (e.getButton() == MouseButton.SECONDARY) {
                     System.out.println("Destroying connections for socket: " + socket.getName());
@@ -257,25 +279,25 @@ public abstract class BaseNode {
                 }
             });
         }
-        
+
         int numOutputs = outputs.size();
         for (int i = 0; i < numOutputs; i++) {
             double y = (-nodeHeight / 2.0) + (nodeHeight / (numOutputs + 1)) * (i + 1);
             Socket socket = outputs.get(i);
-            
+
             Circle socketCircle = new Circle(5, Color.DARKGREEN);
             socket.setRenderRef(socketCircle);
             socketCircle.setTranslateX(nodeWidth / 2.0);
             socketCircle.setTranslateY(y);
 
-            final boolean[] dragging = {false};
+            final boolean[] dragging = { false };
             socketCircle.setOnMouseClicked(e -> {
                 if (e.getButton() == MouseButton.SECONDARY) {
                     socket.destroyConnections();
                     e.consume();
                 }
             });
-            
+
             socketCircle.setOnMousePressed(e -> {
                 if (e.isPrimaryButtonDown()) {
                     dragging[0] = true;
@@ -297,39 +319,32 @@ public abstract class BaseNode {
                 e.consume();
             });
 
-
             renderRef.getChildren().add(socketCircle);
             System.out.println("Rendering socket " + i + ": " + socket.getName() + " -> Y = " + y);
 
         }
     }
 
-
     public void rerenderNodeSize() {
-        // Use layout bounds so we get the laid-out height of the VBox
         double contentHeight = controlsBox.getLayoutBounds().getHeight();
         System.out.println("Content height: " + contentHeight);
 
         double totalHeight = contentHeight; // + extra padding if you want
         this.nodeHeight = Math.max(totalHeight, nodeMinHeight);
 
-        // bodyBox is a Rectangle
         bodyBox.setHeight(nodeHeight);
         bodyBox.setWidth(nodeWidth);
         headerBar.setWidth(nodeWidth);
 
-        // renderRef is presumably a Region backing the control
         renderRef.setPrefHeight(nodeHeight);
 
-        // keep header/title positioned relative to the node's center
         headerBar.setTranslateY(-nodeHeight / 2 + headerHeight / 2);
         titleText.setTranslateY(-nodeHeight / 2 + headerHeight / 2);
-        //titleText.setTranslateX(nodeWidth/2);
+        // titleText.setTranslateX(nodeWidth/2);
 
         System.out.println("Node " + this.title + " resized to height: " + this.nodeHeight);
         rerenderSockets();
     }
-
 
     public Node render() {
         final double[] dragOffset = new double[2];
@@ -370,15 +385,15 @@ public abstract class BaseNode {
         container.setLayoutY(y);
         this.renderRef = container;
 
-
         selected.addListener((obs, oldVal, isSelected) -> {
             bodyBox.setStroke(isSelected ? Color.WHITESMOKE : Color.web("#3a3a3a"));
         });
 
-        /*controlsBox.heightProperty().addListener((obs, oldHeight, newHeight) -> {
-            rerenderNodeSize();
-        });*/
-        
+        /*
+         * controlsBox.heightProperty().addListener((obs, oldHeight, newHeight) -> {
+         * rerenderNodeSize();
+         * });
+         */
 
         container.setOnMouseClicked(e -> {
             if (wasDragged) {
@@ -415,15 +430,13 @@ public abstract class BaseNode {
                 dragStartPositions.clear();
                 for (BaseNode node : YourNodeManager.getSelectedNodes()) {
                     dragStartPositions.put(node, new Point2D(
-                        node.getRenderRef().getLayoutX(),
-                        node.getRenderRef().getLayoutY()
-                    ));
+                            node.getRenderRef().getLayoutX(),
+                            node.getRenderRef().getLayoutY()));
                 }
 
                 e.consume();
             }
         });
-
 
         container.setOnMouseDragged((MouseEvent e) -> {
             if (e.isPrimaryButtonDown()) {
@@ -457,5 +470,5 @@ public abstract class BaseNode {
 }
 
 enum nodeType {
-    MATH, VALUE, TEST, SPREADSHEET
+    MATH, VALUE, TEST, SPREADSHEET, SPLIT
 }

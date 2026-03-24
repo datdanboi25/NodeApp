@@ -1,10 +1,10 @@
-/* ═══════════ Root Background ═══════════ */
+/* Root */
 .root {
     -fx-background-color: #1e1e1e;
     -fx-text-fill: white;
 }
 
-/* ═══════════ Menu Bar ═══════════ */
+/* Menu Bar */
 .menu-bar {
     -fx-background-color: #2c2c2c;
     -fx-text-fill: white;
@@ -12,7 +12,7 @@
     -fx-border-width: 1;
 }
 
-/* Menu buttons (top-level menus like "File", "Help") */
+/* Menu buttons */
 .menu-button {
     -fx-background-color: #2c2c2c;
     -fx-text-fill: #bcbcbc;
@@ -27,12 +27,10 @@
     -fx-text-fill: white;
 }
 
-/* Menu button label inside */
 .menu-button > .label {
     -fx-text-fill: #bcbcbc;
 }
 
-/* Remove blue focus ring */
 .menu-button:focused {
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
@@ -43,7 +41,7 @@
     -fx-border-color: transparent;
 }
 
-/* ═══════════ Dropdown Menu Items ═══════════ */
+/* Menu Items */
 .menu-item {
     -fx-background-color: #2c2c2c;
     -fx-text-fill: #bcbcbc;
@@ -53,12 +51,10 @@
     -fx-padding: 5 10;
 }
 
-/* Force white text inside menu items */
 .menu-item > .label {
     -fx-text-fill: #bcbcbc;
 }
 
-/* Hover effect for menu items */
 .menu-item:hover {
     -fx-background-color: #3a3a3a;
     -fx-text-fill: white;
@@ -78,7 +74,7 @@
     -fx-effect: none; /* Removes drop shadow */
 }
 
-/* ═══════════ Node Icon Labels (Sidebar Buttons) ═══════════ */
+/* Node Icons */
 .label.node-icon {
     -fx-background-color: #3a3a3a;
     -fx-background-radius: 12;
@@ -98,19 +94,19 @@
     -fx-border-width: 1;
 }
 
-/* ═══════════ Selection Rectangle ═══════════ */
+/* Selection Rectangle */
 .selection-rect {
     -fx-fill: rgba(214, 214, 214, 0.13);
     -fx-stroke: #d6d6d6;
     -fx-stroke-dash-array: 4 4;
 }
 
-/* ═══════════ Node Pane (Background) ═══════════ */
+/* Canvas */
 #canvas {
     -fx-background-color: #1e1e1e;
 }
 
-/* ═══════════ Search Field ═══════════ */
+/* Search Field */
 .text-field {
     -fx-background-color: #3a3a3a;
     -fx-text-fill: white;
@@ -120,20 +116,20 @@
     -fx-padding: 5 8;
 }
 
-/* ═══════════ Sidebar (Node Bar) ═══════════ */
+/* Sidebar */
 #node-bar {
     -fx-background-color: #2c2c2c;
     -fx-border-color: #444;
     -fx-border-width: 1;
 }
 
-/* ═══════════ Node Icon Container (VBox) ═══════════ */
+/* Icon Container */
 #icon-container {
     -fx-padding: 5;
     -fx-spacing: 5;
 }
 
-/* ═══════════ Node Interior ═══════════ */
+/* Node Controls */
 
 .node-button {
     -fx-background-color: #3a3a3a;
@@ -151,7 +147,6 @@
     -fx-text-fill: white;
 }
 
-/* This affects the visible part of the ComboBox (the button cell) */
 .node-combo .combo-box-base {
     -fx-background-color: #3a3a3a;
     -fx-border-color: #555;
@@ -159,40 +154,33 @@
     -fx-background-radius: 3;
 }
 
-/* Selected value text */
 .node-combo .text {
     -fx-fill: white;
 }
 
-/* Drop-down arrow background */
 .node-combo .arrow-button {
     -fx-background-color: #3a3a3a;
     -fx-border-radius: 3;
 }
 
-/* Arrow icon color */
 .node-combo .arrow {
     -fx-background-color: white;
 }
 
-/* Popup list */
 .node-combo .list-view {
     -fx-background-color: #3a3a3a;
     -fx-border-color: #555;
 }
 
-/* Items inside dropdown */
 .node-combo .list-cell {
     -fx-background-color: #3a3a3a;
     -fx-text-fill: white;
 }
 
-/* Hovered item style */
 .node-combo .list-cell:hover {
     -fx-background-color: #505050;
 }
 
-/* Selected item style */
 .node-combo .list-cell:selected {
     -fx-background-color: #3a3a3a;
     -fx-text-fill: white;

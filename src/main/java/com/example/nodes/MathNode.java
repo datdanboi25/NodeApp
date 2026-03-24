@@ -24,7 +24,7 @@ public class MathNode extends BaseNode {
     private MathMode mode = MathMode.ADD;
     private StackPane renderRef;
     public static final int priority = 2;
-    private Object value; // Placeholder for computed value
+    private Object value;
     private static final String colour = "#246283";
     private nodeType type;
     public static String name = "Math";
@@ -205,7 +205,6 @@ protected void customReconfigure(){
 
 
     private Object performElementwise(Object a, Object b, BiFunction<Double, Double, Double> op) {
-        // Case 1: list and scalar
         if (a instanceof List<?> list && allAreDoubles(list) && b instanceof Double scalar) {
             return toDoubleList(list).stream().map(x -> op.apply(x, scalar)).toList();
         }
@@ -213,7 +212,6 @@ protected void customReconfigure(){
             return toDoubleList(list).stream().map(x -> op.apply(scalar, x)).toList();
         }
 
-        // Case 2: two lists
         if (a instanceof List<?> listA && b instanceof List<?> listB &&
             allAreDoubles(listA) && allAreDoubles(listB)) {
 
@@ -229,7 +227,6 @@ protected void customReconfigure(){
             return result;
         }
 
-        // Case 3: two scalars
         if (a instanceof Double da && b instanceof Double db) {
             return op.apply(da, db);
         }
@@ -248,11 +245,10 @@ protected void customReconfigure(){
     }
 
     private void rerenderNode() {
-        reconfigureSockets();     // updates internal socket lists
-        renderControls();         // updates controlsBox
+        reconfigureSockets();
+        renderControls();
 
-        // Update socket visuals (optional if your framework handles it elsewhere)
-        rerenderSockets();          // ⬅️ you might need to call this if sockets are re-added
+        rerenderSockets();
     }
 
     private void renderControls() {

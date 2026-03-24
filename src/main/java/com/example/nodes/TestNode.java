@@ -12,7 +12,7 @@ import java.util.function.BiFunction;
 
 public class TestNode extends BaseNode {
     private StackPane renderRef;
-    private Object value; // Placeholder for computed value
+    private Object value;
     public static String name = "Test";
     private static final String color = "#d3d3d3";
     private nodeType type;
@@ -50,22 +50,20 @@ public class TestNode extends BaseNode {
  */
     @Override
     public void evaluate() {
-        this.value = List.of(1.0, 2.0, 3.0, 4.0, 5.0); // immutable list
+        this.value = List.of(1.0, 2.0, 3.0, 4.0, 5.0);
     }
 
     @Override
     public Node render() {
-        renderRef = (StackPane) super.render(); // initializes container + controlsBox
+        renderRef = (StackPane) super.render();
         renderControls();
         return renderRef;
     }
 /*
     private void rerenderNode() {
-        reconfigureSockets();     // updates internal socket lists
-        renderControls();         // updates controlsBox
-
-        // Update socket visuals (optional if your framework handles it elsewhere)
-        rerenderSockets();          // ⬅️ you might need to call this if sockets are re-added
+        reconfigureSockets();
+        renderControls();
+        rerenderSockets();
     }
 */
     private void renderControls() {}

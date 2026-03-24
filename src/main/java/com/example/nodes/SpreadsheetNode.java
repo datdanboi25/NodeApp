@@ -29,17 +29,15 @@ import javafx.stage.Window;
 public class SpreadsheetNode extends BaseNode {
     private StackPane renderRef;
 
-    // Data & state
-    private Object value;                    // Node output: selected column(s) data
+    private List<List<Object>> value;
     public static String name = "Spreadsheet";
     private static final String color = "#207245";
     private nodeType type;
 
-    private FastFrame dataFrame;             // Loaded data table
-    public String file;                      // path (optional for your UI)
+    private FastFrame dataFrame;
+    public String file;
     public List<String> loadedColumns = new ArrayList<>();
 
-    // UI bits
     private ComboBox<String> columnCombo;
     private Label statusLabel;
     
@@ -47,7 +45,7 @@ public class SpreadsheetNode extends BaseNode {
     public SpreadsheetNode(double x, double y) {
         super("Spreadsheet", Color.web(color), x, y);
         this.type = nodeType.SPREADSHEET;
-        this.value = List.of(); // empty until loaded
+        this.value = new ArrayList<>(); // empty until loaded
         
         reconfigureSockets();
     }
@@ -59,7 +57,6 @@ public class SpreadsheetNode extends BaseNode {
 
     @Override
     protected void customReconfigure() {
-        // One vector-like output; your engine can interpret the shape at runtime.
         //outputs.add(new Socket("List", List.of(SocketType.VECTOR), SocketDirection.OUTPUT, this));
         for (String col : loadedColumns) {
             outputs.add(new Socket(col, List.of(SocketType.VECTOR), SocketDirection.OUTPUT, this));
@@ -70,7 +67,6 @@ public class SpreadsheetNode extends BaseNode {
         reconfigureSockets();
     }
 
-    /** Generic reader for a cell, returning boxed Java types for downstream nodes. */
     private static Object getCell(FastFrame df, int row, String colName) {
         Column c = df.col(colName);
         switch (c.type()) {
@@ -87,23 +83,31 @@ public class SpreadsheetNode extends BaseNode {
     
 
     private void updateValueFromSelection() {
-        
-        if (dataFrame==null||loadedColumns.isEmpty()){ this.value=List.of(); return; }
+        if (dataFrame==null||loadedColumns.isEmpty()){this.value=new ArrayList<>(); return; }
+        this.value = new ArrayList<>();
         if (loadedColumns.size()==1) {
-            this.value=buildColumnList(loadedColumns.get(0));
+            this.value.add(getColumnAsList(dataFrame, loadedColumns.get(0)));
         } else {
-            List<Object[]> rows=new ArrayList<>(dataFrame.rows());
-            for (int r=0;r<dataFrame.rows();r++) {
-                Object[] out=new Object[loadedColumns.size()];
-                for (int i=0;i<loadedColumns.size();i++) out[i]=getCell(dataFrame,r,loadedColumns.get(i));
-                rows.add(out);
+            for (String col : loadedColumns) {
+                //TODO: make not slow (dont rebuild every time)
+                this.value.add(getColumnAsList(dataFrame, col));
             }
-            this.value=rows;
-            evaluate();
         }
     }
 
-    /** File picker + load logic. Accepts CSV or XLSX via FastFrame. */
+
+
+    private List<Object> getColumnAsList(FastFrame df, String colName) {
+        int rows = df.rows();
+        List<Object> out = new ArrayList<>(rows);
+
+        for (int r = 0; r < rows; r++) {
+            out.add(getCell(df, r, colName));
+        }
+
+        return out;
+    }
+
     private void openDialogAndLoad() {
         Window owner = (renderRef != null && renderRef.getScene() != null) ? renderRef.getScene().getWindow() : null;
 
@@ -165,22 +169,19 @@ public class SpreadsheetNode extends BaseNode {
         
         if (statusLabel != null) statusLabel.setText("Selected columns: []");
     }
-
-
     public void evaluate() {
-        // Maintain 'value' live from selection.
-        updateValueFromSelection();
         propagate();
     }
 
+ 
+
     @Override
     public Node render() {
-        renderRef = (StackPane) super.render(); // initializes container + controlsBox
+        renderRef = (StackPane) super.render();
         renderControls();
         return renderRef;
     }
 
-    /** Build/refresh the node’s controls (file button + column picker once data is loaded). */
     private void renderControls() {
         
         controlsBox.getChildren().clear();
@@ -249,11 +250,10 @@ public class SpreadsheetNode extends BaseNode {
     }
 
     private void refreshOutputSockets() {
-        // keep non-data outputs if you have them; here we clear all and rebuild
         outputs.removeIf(s -> s.getDirection() == SocketDirection.OUTPUT);
         for (String col : loadedColumns) {
             outputs.add(new Socket(
-                col,                       // socket name = column name
+                col,
                 List.of(SocketType.VECTOR),
                 SocketDirection.OUTPUT,
                 this

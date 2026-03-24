@@ -268,20 +268,20 @@ public class SemanticApp2 extends Application {
 
                 for (BaseNode node : toRemove) {
                     System.out.println("Removing node: " + node.getTitle() + " " + node.getId());
-                    node.delete(nodePane);  // <- this handles connections + visuals
+                    node.delete(nodePane);
                 }
 
                 //allNodes.removeAll(toRemove);
             }
         });
 
-        selectionRect.setFill(Color.web("#d6d6d622")); // semi-transparent blue
+        selectionRect.setFill(Color.web("#d6d6d622"));
         selectionRect.setStroke(Color.web("#d6d6d6"));
         selectionRect.setVisible(false);
         selectionRect.setMouseTransparent(true);
-        selectionRect.getStrokeDashArray().addAll(4.0, 4.0); // optional styling
+        selectionRect.getStrokeDashArray().addAll(4.0, 4.0);
 
-        canvas.getChildren().add(selectionRect); // add it last so it's on top
+        canvas.getChildren().add(selectionRect);
 
 
 
